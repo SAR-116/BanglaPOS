@@ -1,0 +1,568 @@
+[
+    {
+        "id": "f9260fcc176aa11a",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a14210872458ba1f",
+        "type": "mqtt in",
+        "z": "f9260fcc176aa11a",
+        "name": "",
+        "topic": "pos/transaction",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "734d9f9b17a94d52",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 260,
+        "y": 180,
+        "wires": [
+            [
+                "97a3372290823af1",
+                "ee98390687f1caf3"
+            ]
+        ]
+    },
+    {
+        "id": "ee98390687f1caf3",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 430,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "97a3372290823af1",
+        "type": "json",
+        "z": "f9260fcc176aa11a",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 450,
+        "y": 180,
+        "wires": [
+            [
+                "9041d1093ae38d15",
+                "9b57bcaa3ada8892"
+            ]
+        ]
+    },
+    {
+        "id": "9041d1093ae38d15",
+        "type": "function",
+        "z": "f9260fcc176aa11a",
+        "name": "function 1",
+        "func": "// Function Node: Bangla Table Formatter\n\n// Convert English digits to Bangla numerals\nfunction toBanglaNumber(num) {\n    const eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];\n    const ban = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];\n    return num.toString().split('').map(ch => {\n        const i = eng.indexOf(ch);\n        return i > -1 ? ban[i] : ch;\n    }).join('');\n}\n\n// Map product code to Bangla rice name\nfunction getProductName(code) {\n    const names = {\n        100: 'মিনিকেট',\n        101: 'কাটারিভোগ',\n        102: 'নাজিরশাইল',\n        103: 'চিনি আতপ',\n        104: 'কালিজিরা',\n        105: 'বাসমতি',\n        106: 'সুনামি',\n        107: 'আমন চাল',\n        108: 'ইরি চাল',\n        109: 'স্বর্ণ'\n    };\n    return names[code] || 'অজানা';\n}\n\n// Input from MQTT\nlet data = msg.payload;\n\n// Format table row in Bangla\nlet row = {\n    \"পণ্যের কোড\": toBanglaNumber(data.code),\n    \"পণ্যের নাম\": getProductName(data.code),\n    \"পরিমাণ\": toBanglaNumber(data.qty),\n    \"মোট মূল্য\": toBanglaNumber(data.price * data.qty),\n    \"ক্রেতার নাম্বার\": toBanglaNumber(data.customer),\n    \"সময়\": toBanglaNumber(new Date().toLocaleString())\n};\n\n// Retrieve previous table or initialize empty array\nlet table = flow.get(\"banglaTable\") || [];\n\n// Add new row to the beginning\ntable.unshift(row);\n\n// Optionally, limit to last N rows (e.g., 100)\nif (table.length > 100) {\n    table = table.slice(0, 100);\n}\n\n// Save updated table\nflow.set(\"banglaTable\", table);\n\n// Output to ui_table\nmsg.payload = table;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 180,
+        "wires": [
+            [
+                "650dfd71dd6bae65",
+                "915265feaa19adc5",
+                "1025ba8ac9989100",
+                "4731909df4428efc",
+                "c4fa48e0048b3ef5"
+            ]
+        ]
+    },
+    {
+        "id": "9b57bcaa3ada8892",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "650dfd71dd6bae65",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 820,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "915265feaa19adc5",
+        "type": "ui_table",
+        "z": "f9260fcc176aa11a",
+        "group": "0d978a73dd41e751",
+        "name": "",
+        "order": 1,
+        "width": 15,
+        "height": 9,
+        "columns": [],
+        "outputs": 0,
+        "cts": false,
+        "x": 830,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "f4ef6e1e21aa4bcb",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "a80db28dd47d2703",
+        "type": "function",
+        "z": "f9260fcc176aa11a",
+        "name": "function 2",
+        "func": "// 🌐 Function Node: Bangla Inventory Formatter (Miniket First)\n\n// Convert English digits to Bangla numerals\nfunction toBanglaNumber(num) {\n    const eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];\n    const ban = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];\n    return num.toString().split('').map(ch => {\n        const i = eng.indexOf(ch);\n        return i > -1 ? ban[i] : ch;\n    }).join('');\n}\n\n// Map product code to Bangla rice name\nfunction getProductName(code) {\n    const names = {\n        100: 'মিনিকেট',\n        101: 'কাটারিভোগ',\n        102: 'নাজিরশাইল',\n        103: 'চিনি আতপ',\n        104: 'কালিজিরা',\n        105: 'বাসমতি',\n        106: 'সুনামি',\n        107: 'আমন চাল',\n        108: 'ইরি চাল',\n        109: 'স্বর্ণ'\n    };\n    return names[code] || 'অজানা';\n}\n\n// Input payload from MQTT (array of products)\nlet inventory = msg.payload;\n\n// Sort inventory: keep code === 100 at top\ninventory.sort((a, b) => {\n    if (a.code === 100) return -1;\n    if (b.code === 100) return 1;\n    return a.code - b.code; // optional: sort rest ascending\n});\n\n// Format each row\nlet formattedTable = inventory.map(item => ({\n    \"পণ্যের কোড\": toBanglaNumber(item.code),\n    \"পণ্যের নাম\": getProductName(item.code),\n    \"পরিমাণ\": toBanglaNumber(item.qty),\n}));\n\n// Output to ui_table\nmsg.payload = formattedTable;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 680,
+        "wires": [
+            [
+                "b47789aa0ae4dba5",
+                "e8a62a148ee13d3e"
+            ]
+        ]
+    },
+    {
+        "id": "c94506cecf3cb86a",
+        "type": "mqtt in",
+        "z": "f9260fcc176aa11a",
+        "name": "",
+        "topic": "pos/inventory",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "734d9f9b17a94d52",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 250,
+        "y": 680,
+        "wires": [
+            [
+                "cf5277cbd183a603",
+                "a1d8295147aa0f00"
+            ]
+        ]
+    },
+    {
+        "id": "cf5277cbd183a603",
+        "type": "json",
+        "z": "f9260fcc176aa11a",
+        "name": "",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 430,
+        "y": 680,
+        "wires": [
+            [
+                "a80db28dd47d2703",
+                "f4ef6e1e21aa4bcb"
+            ]
+        ]
+    },
+    {
+        "id": "e8a62a148ee13d3e",
+        "type": "ui_table",
+        "z": "f9260fcc176aa11a",
+        "group": "d23a357160fd97b9",
+        "name": "",
+        "order": 1,
+        "width": 7,
+        "height": 6,
+        "columns": [],
+        "outputs": 0,
+        "cts": false,
+        "x": 810,
+        "y": 680,
+        "wires": []
+    },
+    {
+        "id": "b47789aa0ae4dba5",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "a1d8295147aa0f00",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 6",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 400,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "4731909df4428efc",
+        "type": "function",
+        "z": "f9260fcc176aa11a",
+        "name": "function 3",
+        "func": "function banglaToEnglishNumber(bn) {\n    const ban = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];\n    const eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];\n    return bn.toString().split('').map(ch => {\n        const i = ban.indexOf(ch);\n        return i > -1 ? eng[i] : ch;\n    }).join('');\n}\n\nlet table = flow.get(\"banglaTable\") || [];\n\nlet totals = {};\nfor (let row of table) {\n    let name = row[\"পণ্যের নাম\"];\n    let rawAmount = row[\"মোট মূল্য\"] || \"০\";\n    let engAmount = parseInt(banglaToEnglishNumber(rawAmount.replace(/[^\\u09E6-\\u09EF]/g, '')));\n    if (!isNaN(engAmount)) {\n        totals[name] = (totals[name] || 0) + engAmount;\n    }\n}\n\n// Prepare chart payload\nlet labels = Object.keys(totals);\nlet data = Object.values(totals);\n\nmsg.payload = {\n    series: [\"মোট বিক্রি (৳)\"],\n    data: [data],\n    labels: labels\n};\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 360,
+        "wires": [
+            [
+                "8b20afb4284dde77",
+                "429475f86e68749b"
+            ]
+        ]
+    },
+    {
+        "id": "1c693129bb40ea8b",
+        "type": "ui_chart",
+        "z": "f9260fcc176aa11a",
+        "name": "",
+        "group": "8f98b9498d0050c3",
+        "order": 1,
+        "width": 7,
+        "height": 4,
+        "label": "",
+        "chartType": "bar",
+        "legend": "true",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 830,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8b20afb4284dde77",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "1025ba8ac9989100",
+        "type": "function",
+        "z": "f9260fcc176aa11a",
+        "name": "function 4",
+        "func": "let table = flow.get(\"banglaTable\") || [];\nlet total = 0;\n\n// 🔄 Convert Bangla to English digits\nfunction fromBanglaNumber(banStr) {\n    const ban = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];\n    const eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];\n    return banStr.split('').map(ch => {\n        const i = ban.indexOf(ch);\n        return i > -1 ? eng[i] : ch;\n    }).join('');\n}\n\n// 🔄 Convert English to Bangla digits\nfunction toBanglaNumber(num) {\n    const eng = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];\n    const ban = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];\n    return num.toString().split('').map(ch => {\n        const i = eng.indexOf(ch);\n        return i > -1 ? ban[i] : ch;\n    }).join('');\n}\n\n// 🔢 Today's date (only day part)\nlet todayDay = new Date().getDate();  // e.g., 17\n\nfor (let row of table) {\n    let timeStr = row[\"সময়\"];  // e.g., '১৭/০৭/২০২৫ ১২:৫০:১১'\n    if (!timeStr) continue;\n\n    // ⛏️ Extract the day part (first 2 chars before slash)\n    let banglaDayPart = timeStr.split('/')[0];  // '১৭'\n    let englishDayPart = parseInt(fromBanglaNumber(banglaDayPart));\n\n    if (englishDayPart === todayDay) {\n        let value = parseInt(fromBanglaNumber(row[\"মোট মূল্য\"] || '০'));\n        total += value;\n    }\n}\n\nmsg.payload = \"আজকের মোট লেনদেন: ৳ \" + toBanglaNumber(total);\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 764.0000038146973,
+        "y": 252.9999828338623,
+        "wires": [
+            [
+                "342efe042262a2e9",
+                "2404b40e3c8fb778"
+            ]
+        ]
+    },
+    {
+        "id": "342efe042262a2e9",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 8",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "2404b40e3c8fb778",
+        "type": "ui_template",
+        "z": "f9260fcc176aa11a",
+        "group": "d0602e94b6f35dcd",
+        "name": "",
+        "order": 1,
+        "width": 15,
+        "height": 2,
+        "format": "<div style=\"text-align: center; font-size: 36px; font-weight: bold; padding: 10px;\">\n    {{msg.payload}}\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 940,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "429475f86e68749b",
+        "type": "function",
+        "z": "f9260fcc176aa11a",
+        "name": "function 5",
+        "func": "msg.payload = [\n    {\n        labels: msg.payload.labels,\n        series: msg.payload.series,\n        data: msg.payload.data\n    }\n];\nmsg.ui_control = {\n    options: {\n        scales: {\n            x: {\n                ticks: {\n                    maxRotation: 45,    // Rotate labels\n                    minRotation: 45,\n                    font: {\n                        size: 10       // Reduce label size (default is ~12)\n                    }\n                }\n            },\n            y: {\n                ticks: {\n                    font: {\n                        size: 12\n                    }\n                }\n            }\n        }\n    }\n};\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 360,
+        "wires": [
+            [
+                "1c693129bb40ea8b"
+            ]
+        ]
+    },
+    {
+        "id": "c4fa48e0048b3ef5",
+        "type": "function",
+        "z": "f9260fcc176aa11a",
+        "name": "function 6",
+        "func": "let table = flow.get(\"banglaTable\") || [];\n\nlet firebaseUrl = \"https://banglapos-ef91a-default-rtdb.firebaseio.com/banglaTable.json\";\n\nmsg.url = firebaseUrl;\nmsg.method = \"PUT\";  // Replaces all data. Use \"POST\" to append as log entries.\nmsg.headers = {\n    \"Content-Type\": \"application/json\"\n};\nmsg.payload = table;\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 460,
+        "wires": [
+            [
+                "87db78b62b4b0d27"
+            ]
+        ]
+    },
+    {
+        "id": "87db78b62b4b0d27",
+        "type": "http request",
+        "z": "f9260fcc176aa11a",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 610,
+        "y": 460,
+        "wires": [
+            [
+                "2fd8880eb74b4cfc"
+            ]
+        ]
+    },
+    {
+        "id": "2fd8880eb74b4cfc",
+        "type": "debug",
+        "z": "f9260fcc176aa11a",
+        "name": "debug 9",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "734d9f9b17a94d52",
+        "type": "mqtt-broker",
+        "name": "test.mosquitto.org",
+        "broker": "test.mosquitto.org",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "0d978a73dd41e751",
+        "type": "ui_group",
+        "name": "সাম্প্রতিক লেনদেন",
+        "tab": "030104e22a3e460c",
+        "order": 3,
+        "disp": true,
+        "width": "15",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "d23a357160fd97b9",
+        "type": "ui_group",
+        "name": "স্টকের বর্তমান অবস্থা ",
+        "tab": "030104e22a3e460c",
+        "order": 2,
+        "disp": true,
+        "width": "7",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "8f98b9498d0050c3",
+        "type": "ui_group",
+        "name": "বিক্রয় পরিসংখ্যান",
+        "tab": "030104e22a3e460c",
+        "order": 4,
+        "disp": true,
+        "width": "7",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "d0602e94b6f35dcd",
+        "type": "ui_group",
+        "name": "মোট লেনদেন",
+        "tab": "030104e22a3e460c",
+        "order": 1,
+        "disp": false,
+        "width": "15",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "030104e22a3e460c",
+        "type": "ui_tab",
+        "name": "BanglaPOS",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
